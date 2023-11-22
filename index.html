@@ -19,7 +19,7 @@
           <img src="logo.png" alt="today I learned logo" />
           <h1>Today I learned</h1>
         </div>
-        <button>Share a Fact</button>
+        <button class="btn btn-large">Share a Fact</button>
       </header>
       <form class="fact-form">
         <input type="text" placeholder="Share a fact with the world" />
@@ -31,13 +31,28 @@
           <option value="Finance">Finance</option>
           <option value="">Choose category</option>
         </select>
+        <button class="btn btn-large">Post</button>
       </form>
       <main class="main">
         <aside>
           <ul>
-            <li><button>All</button></li>
-            <li><button>Technology</button></li>
-            <li><button>Science</button></li>
+            <li class="category">
+              <button class="btn btn-all-categories">All</button>
+            </li>
+            <li class="category">
+              <button
+                class="btn btn-category"
+                style="background-color: #3b82f5">
+                Technology
+              </button>
+            </li>
+            <li class="category">
+              <button
+                class="btn btn-category"
+                style="background-color: #16a34a">
+                Science
+              </button>
+            </li>
           </ul>
         </aside>
         <section>
