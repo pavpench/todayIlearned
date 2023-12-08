@@ -11,6 +11,10 @@ body {
   padding: 48px 64px;
 }
 
+.hidden {
+  display: none !important;
+}
+
 /* MAIN LAYOUT */
 
 .container {
@@ -32,6 +36,7 @@ body {
   gap: 48px;
 }
 
+/* Mobile design less than 900px */
 @media (max-width: 900px) {
   .main {
     grid-template-columns: 1fr;
