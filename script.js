@@ -6,7 +6,11 @@ const shareButton = document.querySelector(".btn-large");
 const form = document.querySelector(".fact-form");
 
 shareButton.addEventListener("click", function () {
-  form.classList.contains("hidden")
-    ? form.classList.remove("hidden")
-    : form.classList.add("hidden");
+  if (form.classList.contains("hidden")) {
+    form.classList.remove("hidden");
+    shareButton.textContent = "Close";
+  } else {
+    form.classList.add("hidden");
+    shareButton.textContent = "Share a Fact";
+  }
 });
