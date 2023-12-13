@@ -191,7 +191,7 @@ ul {
 
 .fact-form input,
 .fact-form select {
-  width: 250px;
+  /* width: 250px; */
   background-color: #78716c;
   border: none;
   border-radius: 100px;
