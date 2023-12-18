@@ -125,7 +125,9 @@ function createFactsList(dataArray) {
       (Source)
     </a>
   </p>
-  <span class="tag" style="background-color: #3b82f5">
+  <span class="tag" style="background-color: ${
+    CATEGORIES.find((cat) => cat.name === fact.category).color
+  }">
     ${fact.category}
   </span>`
   );
