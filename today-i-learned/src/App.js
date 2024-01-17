@@ -62,14 +62,16 @@ const initialFacts = [
 
 function App() {
   const [showForm, setShowForm] = useState(false);
-
+  const [facts, setFacts] = useState(initialFacts);
   return (
     <>
       <Header showForm={showForm} setShowForm={setShowForm} />
-      {showForm ? <NewFactForm /> : null}
+      {showForm ? (
+        <NewFactForm setFacts={setFacts} setShowForm={setShowForm} />
+      ) : null}
       <main className="main">
         <CategoryFilter />
-        <FactList />
+        <FactList facts={facts} />
       </main>
     </>
   );
@@ -95,25 +97,54 @@ function Header({ showForm, setShowForm }) {
   );
 }
 
-function NewFactForm() {
+function NewFactForm({ setFacts, setShowForm }) {
   const [text, setText] = useState("");
   const [source, setSource] = useState("");
   const [category, setCategory] = useState("");
   const textLength = text.length;
+
+  /** Check if input is valid URL */
+
+  function isValidHttpUrl(string) {
+    let url;
+    try {
+      url = new URL(string);
+      console.log(url);
+    } catch (_) {
+      return false;
+    }
+    return url.protocol === "http:" || url.protocol === "https:";
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
     console.log(text, source, category);
 
     //2. Check if data is valid
-
-    //3. Create a new fact object
-
-    //4. Add new fact to the UI
-
-    //5. Reset input fields
-
-    //6. Close the form
+    if (text && isValidHttpUrl(source) && category && textLength <= 200) {
+      console.log("there is data");
+      //3. Create a new fact object
+      const newFact = {
+        id: Math.round(Math.random() * 100),
+        text,
+        source,
+        category: category,
+        votesInteresting: 0,
+        votesMindblowing: 0,
+        votesFalse: 0,
+        createdIn: new Date().getFullYear(),
+      };
+      //4. Add new fact to the UI
+      setFacts((facts) => {
+        return [newFact, ...facts];
+      });
+      //5. Reset input fields
+      setText("");
+      setSource("");
+      setCategory("");
+      //6. Close the form
+      setShowForm("");
+    }
   }
 
   return (
@@ -175,10 +206,7 @@ function CategoryFilter() {
   );
 }
 
-function FactList() {
-  // Temporary
-  const facts = initialFacts;
-
+function FactList({ facts }) {
   return (
     <section>
       <ul className="facts-list">
