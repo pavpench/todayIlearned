@@ -64,14 +64,31 @@ const initialFacts = [
 function App() {
   const [showForm, setShowForm] = useState(false);
   const [facts, setFacts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentCategory, setCategory] = useState("all");
 
-  useEffect(function () {
-    async function getFacts() {
-      const { data: facts, error } = await supabase.from("facts").select("*");
-      setFacts(facts);
-    }
-    getFacts();
-  }, []);
+  useEffect(
+    function () {
+      async function getFacts() {
+        setIsLoading(true);
+
+        let query = supabase.from("facts").select("*");
+
+        if (currentCategory !== "all")
+          query = query.eq("category", currentCategory);
+
+        const { data: facts, error } = await query
+          .order("votesInteresting", { ascending: false })
+          .limit(1000);
+
+        if (!error) setFacts(facts);
+        else alert("There was a problem getting data");
+        setIsLoading(false);
+      }
+      getFacts();
+    },
+    [currentCategory]
+  );
 
   return (
     <>
@@ -80,11 +97,15 @@ function App() {
         <NewFactForm setFacts={setFacts} setShowForm={setShowForm} />
       ) : null}
       <main className="main">
-        <CategoryFilter />
-        <FactList facts={facts} />
+        <CategoryFilter setCategory={setCategory} />
+        {isLoading ? <Loader /> : <FactList facts={facts} />}
       </main>
     </>
   );
+}
+
+function Loader() {
+  return <p className="message">Loading...</p>;
 }
 
 function Header({ showForm, setShowForm }) {
@@ -112,6 +133,7 @@ function NewFactForm({ setFacts, setShowForm }) {
   const [source, setSource] = useState("");
   const [category, setCategory] = useState("");
   const textLength = text.length;
+  const [isUploading, setIsUploading] = useState(false);
 
   /** Check if input is valid URL */
 
@@ -126,7 +148,7 @@ function NewFactForm({ setFacts, setShowForm }) {
     return url.protocol === "http:" || url.protocol === "https:";
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     console.log(text, source, category);
 
@@ -134,19 +156,28 @@ function NewFactForm({ setFacts, setShowForm }) {
     if (text && isValidHttpUrl(source) && category && textLength <= 200) {
       console.log("there is data");
       //3. Create a new fact object
-      const newFact = {
-        id: Math.round(Math.random() * 100),
-        text,
-        source,
-        category: category,
-        votesInteresting: 0,
-        votesMindblowing: 0,
-        votesFalse: 0,
-        createdIn: new Date().getFullYear(),
-      };
+      // const newFact = {
+      //   id: Math.round(Math.random() * 100),
+      //   text,
+      //   source,
+      //   category: category,
+      //   votesInteresting: 0,
+      //   votesMindblowing: 0,
+      //   votesFalse: 0,
+      //   createdIn: new Date().getFullYear(),
+      // };
+
+      //3. Upload fact to Supabase and receive the new fact object
+      setIsUploading(true);
+      const { data: newFact, error } = await supabase
+        .from("facts")
+        .insert([{ text, source, category }])
+        .select();
+      setIsUploading(false);
+
       //4. Add new fact to the UI
       setFacts((facts) => {
-        return [newFact, ...facts];
+        return [newFact[0], ...facts];
       });
       //5. Reset input fields
       setText("");
@@ -166,6 +197,7 @@ function NewFactForm({ setFacts, setShowForm }) {
         onChange={(e) => {
           setText(e.target.value);
         }}
+        disabled={isUploading}
       />
       <span>{200 - textLength}</span>
       <input
@@ -175,12 +207,14 @@ function NewFactForm({ setFacts, setShowForm }) {
         onChange={(e) => {
           return setSource(e.target.value);
         }}
+        disabled={isUploading}
       />
       <select
         value={category}
         name=""
         id=""
-        onChange={(e) => setCategory(e.target.value)}>
+        onChange={(e) => setCategory(e.target.value)}
+        disabled={isUploading}>
         <option value="">Choose category</option>
         {CATEGORIES.map((cat) => (
           <option key={cat.name} value={cat.name}>
@@ -188,24 +222,31 @@ function NewFactForm({ setFacts, setShowForm }) {
           </option>
         ))}
       </select>
-      <button className="btn btn-large">Post</button>
+      <button className="btn btn-large" disabled={isUploading}>
+        Post
+      </button>
     </form>
   );
 }
 
-function CategoryFilter() {
+function CategoryFilter({ setCategory }) {
   return (
     <aside>
       <ul>
         <li className="category">
-          <button className="btn btn-all-categories">All</button>
+          <button
+            className="btn btn-all-categories"
+            onClick={() => setCategory("all")}>
+            All
+          </button>
         </li>
         {CATEGORIES.map((cat) => {
           return (
             <li key={cat.name} className="category">
               <button
                 className="btn btn-category"
-                style={{ backgroundColor: cat.color }}>
+                style={{ backgroundColor: cat.color }}
+                onClick={() => setCategory(cat.name)}>
                 {cat.name}
               </button>
             </li>
@@ -217,6 +258,14 @@ function CategoryFilter() {
 }
 
 function FactList({ facts }) {
+  if (facts.length === 0) {
+    return (
+      <p className="message">
+        No facts for this category yet. Create the first one ! :)
+      </p>
+    );
+  }
+
   return (
     <section>
       <ul className="facts-list">
