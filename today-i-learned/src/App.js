@@ -1,5 +1,6 @@
 import "./style.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import supabase from "./supabase";
 
 const CATEGORIES = [
   { name: "technology", color: "#3b82f6" },
@@ -62,7 +63,16 @@ const initialFacts = [
 
 function App() {
   const [showForm, setShowForm] = useState(false);
-  const [facts, setFacts] = useState(initialFacts);
+  const [facts, setFacts] = useState([]);
+
+  useEffect(function () {
+    async function getFacts() {
+      const { data: facts, error } = await supabase.from("facts").select("*");
+      setFacts(facts);
+    }
+    getFacts();
+  }, []);
+
   return (
     <>
       <Header showForm={showForm} setShowForm={setShowForm} />
