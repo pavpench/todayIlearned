@@ -261,7 +261,11 @@ function Fact({ fact, setFacts }) {
         <p>
           {isDisputed ? <span className="disputed">[DISPUTED]</span> : null}
           {fact.text}
-          <a href={fact.source} className="source" target="_blank">
+          <a
+            href={fact.source}
+            className="source"
+            target="_blank"
+            rel="noreferrer">
             (Source)
           </a>
         </p>
